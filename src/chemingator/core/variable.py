@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import dataclasses
 
-
-@dataclasses.dataclass(eq=False)
 class Variable:
     """A scalar unknown or specification.
 
@@ -15,20 +12,44 @@ class Variable:
     Attributes:
         name: Globally unique name, e.g. "S1.flow[A]"
         value: Current value or initial guess while unsolved.
-        fixed: True if value if a specification.
+        fixed: True if value is a specification.
         units: SI unit string.
     """
 
-    name: str
-    value: float | None = None
-    fixed: bool = False
-    units: str = ""
+    def __init__(
+        self,
+        name: str,
+        value: float | None = None,
+        fixed: bool = False,
+        units: str = "",
+    ) -> None:
+        self.name = name
+        self.units = units
+        self._value = value
+        self._fixed = False
+        if fixed:
+            self.fix()
 
-    def __post_init__(self) -> None:
-        if self.fixed and self.value is None:
+    def __repr__(self) -> str:
+        return self.name
+
+    @property
+    def value(self) -> float | None:
+        """Current value or initial guess."""
+        return self._value
+
+    @value.setter
+    def value(self, new_value: float | None) -> None:
+        if new_value is None and self._fixed:
             raise ValueError(
-                f"Unable to fix variable {self.name} with `value` None."
+                "Unable to set `value` of a fixed variable to None."
             )
+        self._value = new_value
+
+    @property
+    def fixed(self) -> bool:
+        """True if value is a specification."""
+        return self._fixed
 
     def fix(self, value: float | None = None) -> None:
         """Marks the variable as a specification.
@@ -40,15 +61,15 @@ class Variable:
             ValueError: If both `value` and the current value are None.
         """
         if value is not None:
-            self.value = value
+            self._value = value
 
-        if self.value is None:
+        if self._value is None:
             raise ValueError(
                 f"Unable to fix variable {self.name} with `value` None."
             )
 
-        self.fixed = True
+        self._fixed = True
 
     def unfix(self) -> None:
         """Marks the variable as an unknown, keeping it's value as a guess."""
-        self.fixed = False
+        self._fixed = False
