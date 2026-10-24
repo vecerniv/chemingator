@@ -18,6 +18,10 @@ dev = [
     "pytest>=9.1.1",
 ]
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.pyink]
 line-length = 80
 pyink-indentation = 4
