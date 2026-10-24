@@ -1,1 +1,3 @@
-# stub file to pass github CI
+"""The main ``chemingator`` namespace."""
+
+from chemingator.core import *
