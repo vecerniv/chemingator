@@ -1,4 +1,4 @@
-"""Scalar variables: unknowns and specification of a flowsheet"""
+"""Scalar variables: unknowns and specifications of a flowsheet"""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ import dataclasses
 class Variable:
     """A scalar unknown or specification.
 
-    Specifications are made by fixing a variable to a value. Residuals are
-    written in terms of `symbol`.
+    Specifications are made by fixing a variable to a value.
+    Residuals are written in terms of `symbol`.
 
     Attributes:
         name: Globally unique name, e.g. "S1.flow[A]"
@@ -26,7 +26,9 @@ class Variable:
 
     def __post_init__(self) -> None:
         if self.fixed and self.value is None:
-            raise ValueError("Unable to fix a variable with `value` None.")
+            raise ValueError(
+                f"Unable to fix variable {self.name} with `value` None."
+            )
 
     def fix(self, value: float | None = None) -> None:
         """Marks the variable as a specification.
@@ -41,7 +43,9 @@ class Variable:
             self.value = value
 
         if self.value is None:
-            raise ValueError("Unable to fix a variable with `value` None.")
+            raise ValueError(
+                f"Unable to fix variable {self.name} with `value` None."
+            )
 
         self.fixed = True
 
