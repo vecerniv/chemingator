@@ -24,6 +24,10 @@ class Variable:
     fixed: bool = False
     units: str = ""
 
+    def __post_init__(self):
+        if self.fixed and self.value is None:
+            raise ValueError("Unable to fix a variable with `value` None.")
+
     def fix(self, value: float | None = None) -> None:
         """Marks the variable as a specification.
 
@@ -33,8 +37,14 @@ class Variable:
         Raises:
             ValueError: If both `value` and the current value are None.
         """
-        raise NotImplementedError
+        if value is not None:
+            self.value = value
+
+        if self.value is None:
+            raise ValueError("Unable to fix a variable with `value` None.")
+
+        self.fixed = True
 
     def unfix(self) -> None:
         """Marks the variable as an unknown, keeping it's value as a guess."""
-        raise NotImplementedError
+        self.fixed = False
