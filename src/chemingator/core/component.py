@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 import dataclasses
 
 
@@ -32,8 +32,31 @@ class ComponentList:
         Raises:
             ValueError: If a name appears more than once.
         """
-        raise NotImplementedError
+        self.components = dict()
+        if isinstance(components[0], Component):
+            for comp in components:
+                self.components[comp.name] = comp
+
+        if isinstance(components[0], str):
+            for comp_name in components:
+                self.components[comp_name] = Component(comp_name)
+
+    def __iter__(self) -> Iterator[Component]:
+        for _, comp in self.components.items():
+            yield comp
+
+    def __len__(self) -> int:
+        return len(self.components)
+
+    def __contains__(self, name: object) -> bool:
+        if name in self.names():
+            return True
+        else:
+            return False
+
+    def __getitem__(self, name: str) -> Component:
+        return self.components[name]
 
     def names(self) -> list[str]:
         """Returns component names in order."""
-        raise NotImplementedError
+        return [*self.components]
