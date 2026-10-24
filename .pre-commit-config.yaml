@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: uv run isort
+        language: system
+        types: [python]
+      - id: pyink
+        name: pyink
+        entry: uv run pyink
+        language: system
+        types: [python]
+      - id: pylint
+        name: pylint
+        entry: uv run pylint
+        language: system
+        types: [python]
