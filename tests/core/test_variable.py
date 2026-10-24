@@ -8,7 +8,7 @@ from chemingator.core.variable import Variable
 
 
 def test_defaults() -> None:
-    """A variable create with only a name is an unknown with no value."""
+    """A variable created with only a name is an unknown with no value."""
     var = Variable("T")
 
     assert var.name == "T"
@@ -18,7 +18,7 @@ def test_defaults() -> None:
 
 
 def test_create_fixed_with_value() -> None:
-    """A variable can be created already fixed if it has value."""
+    """A variable can be created already fixed if it has a value."""
     var = Variable("T", value=300.0, fixed=True, units="K")
 
     assert var.value == 300.0
@@ -30,6 +30,38 @@ def test_create_fixed_without_value_raises() -> None:
     """A specification without value is rejected."""
     with pytest.raises(ValueError):
         Variable("T", fixed=True)
+
+
+# --- Properties -------------------------------------------------------------
+
+
+def test_fixed_var_cannot_lose_value() -> None:
+    """A fixed variable cannot have None assigned to `value`."""
+    var = Variable("T", value=300.0, fixed=True)
+
+    with pytest.raises(ValueError):
+        var.value = None
+
+    assert var.value == 300.0
+
+
+def test_unfix_var_can_be_none() -> None:
+    """An unfix variable can have None assigned to `value`."""
+    var = Variable("T", value=300.0)
+
+    var.value = None
+
+    assert var.value is None
+
+
+def test_fixed_is_read_only() -> None:
+    """`fixes` attribute can only be changed with fix() and unfix()."""
+    var = Variable("T")
+
+    with pytest.raises(AttributeError):
+        var.fixed = True
+
+    assert var.fixed is False
 
 
 # --- fix() ------------------------------------------------------------------
