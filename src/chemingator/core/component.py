@@ -40,17 +40,13 @@ class ComponentList:
             self.components[comp.name] = comp
 
     def __iter__(self) -> Iterator[Component]:
-        for _, comp in self.components.items():
-            yield comp
+        yield from self.components.values()
 
     def __len__(self) -> int:
         return len(self.components)
 
     def __contains__(self, name: object) -> bool:
-        if name in self.names():
-            return True
-        else:
-            return False
+        return name in self.components
 
     def __getitem__(self, name: str) -> Component:
         return self.components[name]
