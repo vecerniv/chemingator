@@ -24,7 +24,7 @@ class Variable:
     fixed: bool = False
     units: str = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.fixed and self.value is None:
             raise ValueError("Unable to fix a variable with `value` None.")
 

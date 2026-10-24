@@ -32,14 +32,12 @@ class ComponentList:
         Raises:
             ValueError: If a name appears more than once.
         """
-        self.components = dict()
-        if isinstance(components[0], Component):
-            for comp in components:
-                self.components[comp.name] = comp
-
-        if isinstance(components[0], str):
-            for comp_name in components:
-                self.components[comp_name] = Component(comp_name)
+        self.components: dict[str, Component] = {}
+        for item in components:
+            comp = item if isinstance(item, Component) else Component(item)
+            if comp.name in self.components:
+                raise ValueError(f"Duplicate component name: {comp.name!r}")
+            self.components[comp.name] = comp
 
     def __iter__(self) -> Iterator[Component]:
         for _, comp in self.components.items():
