@@ -13,7 +13,7 @@ class Variable:
     written in terms of `symbol`.
 
     Attributes:
-        name: Globally unique name, e.g. "A"
+        name: Globally unique name, e.g. "S1.flow[A]"
         value: Current value or initial guess while unsolved.
         fixed: True if value if a specification.
         units: SI unit string.
