@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 import math
 
 from chemingator import exceptions
@@ -122,7 +122,21 @@ class Stream:
             molar_flows[name] = molar_flow
         self.specify(molar_flows)
 
-    def _check_names(self, flows: Mapping[str, float]) -> None:
+    def unspecify(self, *names: str) -> None:
+        """Unfixes component flows, keeping their values as guesses.
+
+        Args:
+            *names: Component names, none unfixes all components.
+
+        Raises:
+            KeyError: If a name is not a component of the stream.
+        """
+        targets = names or tuple(self.flow)
+        self._check_names(targets)
+        for name in targets:
+            self.flow[name].unfix()
+
+    def _check_names(self, flows: Iterable[str]) -> None:
         unknown = [name for name in flows if name not in self.flow]
         if unknown:
-            raise KeyError(f"{unknown!r} not a compoenent of {self.name!r}.")
+            raise KeyError(f"Not a components of {self.name!r}: {unknown!r}.")
