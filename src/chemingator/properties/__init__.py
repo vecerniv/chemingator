@@ -1,0 +1,1 @@
+"""Module managing physical properties."""
