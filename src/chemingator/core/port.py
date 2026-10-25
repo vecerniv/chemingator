@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import enum
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from chemingator.core import stream as cg_stream
+    from chemingator.units import base as cg_units
 
 from chemingator.exceptions import ConnectivityError
 
@@ -25,18 +29,18 @@ class Port:
         stream: The attached stream or None.
     """
 
-    def __init__(self, unit: Any, name: str, kind: PortKind) -> None:
+    def __init__(self, unit: cg_units.Unit, name: str, kind: PortKind) -> None:
         self.unit = unit
         self.name = name
         self.kind = kind
-        self.stream: Any | None = None
+        self.stream: cg_stream.Stream | None = None
 
     @property
     def connected(self) -> bool:
         """Whether a stream is connected to this port."""
         return self.stream is not None
 
-    def attach(self, stream: Any) -> None:
+    def attach(self, stream: cg_stream.Stream) -> None:
         """Attaches a stream to this port.
 
         Args:
