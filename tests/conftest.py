@@ -21,19 +21,19 @@ class DummyUnit(Unit):
         return 0
 
 
-@pytest.fixture
-def unit() -> Unit:
+@pytest.fixture(name="unit")
+def fixture_unit() -> Unit:
     """A unit named "M1" to own ports."""
     return DummyUnit("M1")
 
 
-@pytest.fixture
-def components() -> ComponentList:
+@pytest.fixture(name="components")
+def fixture_components() -> ComponentList:
     """Components "A" and "B"."""
     return ComponentList(["A", "B"])
 
 
-@pytest.fixture
-def stream(components: ComponentList) -> Stream:  # pylint: disable=redefined-outer-name
+@pytest.fixture(name="stream")
+def fixture_stream(components: ComponentList) -> Stream:
     """A stream "S1" not yet attached to any port."""
     return Stream("S1", components)
