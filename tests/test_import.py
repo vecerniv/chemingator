@@ -8,11 +8,27 @@ MODULES = [
     "chemingator",
     "chemingator.core",
     "chemingator.core.component",
+    "chemingator.core.expression",
+    "chemingator.core.port",
+    "chemingator.core.stream",
     "chemingator.core.variable",
     "chemingator.exceptions",
+    "chemingator.properties",
+    "chemingator.properties.base",
+    "chemingator.units",
+    "chemingator.units.base",
 ]
 
-PUBLIC_NAMES = ["Component", "ComponentList", "Variable"]
+PUBLIC_NAMES = [
+    "BasisError",
+    "ChemingatorError",
+    "Component",
+    "ComponentList",
+    "ConnectivityError",
+    "DegreesOfFreedomError",
+    "SolverError",
+    "Variable",
+]
 
 
 @pytest.mark.parametrize("module_name", MODULES)
