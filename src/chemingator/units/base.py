@@ -32,16 +32,30 @@ class Unit(abc.ABC):
         self._internal: list[variable.Variable] = []
 
     def _add_inlet(self, name: str) -> port.Port:
-        """Creates an inlet port, registers it and returns it."""
+        """Creates an inlet port, registers it and returns it.
+
+        Raises:
+            ValueError: If the unit already has a port callen `name`.
+        """
+        self._check_port_names(name)
         inlet = port.Port(self, name, port.PortKind.INLET)
         self.inlets.append(inlet)
         return inlet
 
     def _add_outlet(self, name: str) -> port.Port:
-        """Creates an outlet port, registers it and returns it."""
+        """Creates an outlet port, registers it and returns it.
+
+        Raises:
+            ValueError: If the unit already has a port callen `name`.
+        """
+        self._check_port_names(name)
         outlet = port.Port(self, name, port.PortKind.OUTLET)
         self.outlets.append(outlet)
         return outlet
+
+    def _check_port_names(self, name: str) -> None:
+        if any(p.name == name for p in self.ports()):
+            raise ValueError(f"Unit {self.name!r} already has a port {name!r}.")
 
     def _add_variable(
         self, local_name: str, **kwargs: Any
