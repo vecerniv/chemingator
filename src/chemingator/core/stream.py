@@ -22,7 +22,7 @@ class Stream:
         name: Unique stream name.
         flow: Component name -> molar flow variable (mol/s)
         source: Outlet port feeding this stream. None for system input.
-        destination: Inlet port recieveing this stream. None for system output.
+        destination: Inlet port receiving this stream. None for system output.
     """
 
     def __init__(self, name: str, components: component.ComponentList) -> None:
@@ -70,7 +70,7 @@ class Stream:
 
         Args:
             flows: Component name -> molar flow in mol/s.
-            **kwargs: Same, for names that are valied identifiers.
+            **kwargs: Same, for names that are valid identifiers.
 
         Raises:
             KeyError: If a name is not a component of the flowsheet.
@@ -85,18 +85,18 @@ class Stream:
     ) -> None:
         """Fixes component flows on a given mass basis.
 
-        Each mass flow in converted with the component's molar mass.
+        Each mass flow is converted with the component's molar mass.
 
-        Usage: specify(A=10.0, B=5.0) or specify({"N2": 3.0}).
+        Usage: specify_mass(A=10.0, B=5.0) or specify_mass({"N2": 3.0}).
 
         Args:
             flows: Component name -> mass flow in kg/s.
-            **kwargs: Same, for names that are valied identifiers.
+            **kwargs: Same, for names that are valid identifiers.
 
         Raises:
             KeyError: If a name is not a component of the stream.
-            BasisError: If a component has no molar mass, or it's molar flow
-                is already fixed to an different value.
+            BasisError: If a component has no molar mass, or its molar flow
+                is already fixed to a different value.
         """
         mass_flows = {**(flows or {}), **kwargs}
         self._check_names(mass_flows)
@@ -139,4 +139,4 @@ class Stream:
     def _check_names(self, flows: Iterable[str]) -> None:
         unknown = [name for name in flows if name not in self.flow]
         if unknown:
-            raise KeyError(f"Not a components of {self.name!r}: {unknown!r}.")
+            raise KeyError(f"Not components of {self.name!r}: {unknown!r}.")
