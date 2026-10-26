@@ -73,3 +73,16 @@ class Variable:
     def unfix(self) -> None:
         """Marks the variable as an unknown, keeping it's value as a guess."""
         self._fixed = False
+
+
+def current_value(var: Variable) -> float:
+    """Returns a variable's value.
+
+    Acts as a numeric resolver.
+
+    Raises:
+        ValueError: If the variable has no value yet.
+    """
+    if var.value is None:
+        raise ValueError(f"Variable {var.name!r} has no value.")
+    return var.value
