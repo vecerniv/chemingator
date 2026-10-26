@@ -14,3 +14,5 @@ Resolver: TypeAlias = Callable[[variable.Variable], Scalar]
 MathOps: TypeAlias = types.ModuleType
 # A function producing residuals
 ResidualModel: TypeAlias = Callable[[Resolver, MathOps], list[Scalar]]
+# User specification equation
+Constraint: TypeAlias = Callable[[Resolver, MathOps], Scalar]
