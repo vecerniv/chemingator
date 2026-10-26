@@ -56,6 +56,10 @@ class Unit(abc.ABC):
         """Returns variables owned by the unit."""
         return [*self._internal]
 
+    def ports(self) -> list[port.Port]:
+        """Returns all ports, inlets first."""
+        return [*self.inlets, *self.outlets]
+
     @abc.abstractmethod
     def residuals(
         self, val: expression.Resolver, ops: expression.MathOps
