@@ -2,6 +2,7 @@
 
 import pytest
 
+from chemingator.core.variable import current_value
 from chemingator.core.variable import Variable
 
 # --- Construction -----------------------------------------------------------
@@ -55,7 +56,7 @@ def test_unfix_var_can_be_none() -> None:
 
 
 def test_fixed_is_read_only() -> None:
-    """`fixes` attribute can only be changed with fix() and unfix()."""
+    """`fixed` attribute can only be changed with fix() and unfix()."""
     var = Variable("T")
 
     with pytest.raises(AttributeError):
@@ -111,7 +112,7 @@ def test_fix_without_value_raises() -> None:
 
 
 def test_unfix_keeps_value() -> None:
-    """unfix() turns a specification into a guess, keeping it's value."""
+    """unfix() turns a specification into a guess, keeping its value."""
     var = Variable("T", value=300.0, fixed=True)
 
     var.unfix()
@@ -139,3 +140,21 @@ def test_variable_hashable() -> None:
     lookup = {var: 0}
 
     assert lookup[var] == 0
+
+
+# --- current_value() --------------------------------------------------------
+
+
+def test_current_value() -> None:
+    """The numeric resolver returns the variable's value."""
+    var = Variable("T", value=300.0)
+
+    assert current_value(var) == 300.0
+
+
+def test_current_value_unset_raises() -> None:
+    """A variable without a value cannot be resolved to a number."""
+    var = Variable("T")
+
+    with pytest.raises(ValueError, match="'T'"):
+        current_value(var)
