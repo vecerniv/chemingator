@@ -25,6 +25,7 @@ PUBLIC_NAMES = [
     "Component",
     "ConnectivityError",
     "DegreesOfFreedomError",
+    "Flowsheet",
     "SolverError",
     "Stream",
 ]
