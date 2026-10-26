@@ -13,7 +13,7 @@ from chemingator.units.base import Unit
 
 
 def test_port_init(unit: Unit) -> None:
-    """A new port stores its owner, name and kinb, and has no stream."""
+    """A new port stores its owner, name and kind, and has no stream."""
     port = Port(unit, "in0", PortKind.INLET)
 
     assert port.unit is unit
@@ -46,7 +46,7 @@ def test_attach_inlet(unit: Unit, stream: Stream) -> None:
 
 
 def test_attach_outlet(unit: Unit, stream: Stream) -> None:
-    """An outlet becomes the stream's source, not it's destination."""
+    """An outlet becomes the stream's source, not its destination."""
     port = Port(unit, "out0", PortKind.OUTLET)
 
     port.attach(stream)
@@ -87,10 +87,12 @@ def test_attach_stream_to_outlet_and_inlet(unit: Unit, stream: Stream) -> None:
 @pytest.mark.parametrize(
     "kind", [PortKind.INLET, PortKind.OUTLET], ids=["inlet", "outlet"]
 )
-def test_attach_stream_with_taken_destination_raises(
+def test_attach_stream_with_taken_end_raises(
     unit: Unit, stream: Stream, kind: PortKind
 ) -> None:
-    """A stream with destination taken is rejected and nothing is relinked."""
+    """A stream whose matching end is taken is rejected and nothing is
+    relinked.
+    """
     port1 = Port(unit, "p0", kind)
     port2 = Port(unit, "p1", kind)
     port1.attach(stream)
