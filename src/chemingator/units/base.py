@@ -20,8 +20,8 @@ class Unit(abc.ABC):
     Attributes:
         name: Unique unit name.
         inlets: Inlet ports in declaration order.
-        outlets" Outlet ports in declaration order.
-        flowsheet: Owning flowsheer, set by Flowsheet.add_unit().
+        outlets: Outlet ports in declaration order.
+        flowsheet: Owning flowsheet, set by Flowsheet.add_unit().
     """
 
     def __init__(self, name: str) -> None:
@@ -46,8 +46,7 @@ class Unit(abc.ABC):
     def _add_variable(
         self, local_name: str, **kwargs: Any
     ) -> variable.Variable:
-        """Creates a variable named f'{self.name}.{local_name}', registers it
-        and returns it."""
+        """Creates a variable, registers it and returns it."""
         var = variable.Variable(f"{self.name}.{local_name}", **kwargs)
         self._internal.append(var)
         return var
@@ -70,7 +69,7 @@ class Unit(abc.ABC):
 
         Args:
             val: Maps each variable to a float, symbol, etc.
-            ops: Namespace providing operation like exp, log, ...
+            ops: Namespace providing operations like exp, log, ...
         """
 
     @abc.abstractmethod
