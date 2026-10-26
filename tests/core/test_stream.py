@@ -5,6 +5,7 @@ import pytest
 from chemingator.core.component import Component
 from chemingator.core.component import ComponentList
 from chemingator.core.stream import Stream
+from chemingator.core.variable import current_value
 from chemingator.exceptions import BasisError
 
 # --- Fixtures ---------------------------------------------------------------
@@ -46,7 +47,7 @@ def test_variables_in_component_order(stream: Stream) -> None:
     assert stream.variables() == [stream.flow["A"], stream.flow["B"]]
 
 
-# --- total_flow() and molar_fraction() --------------------------------------
+# --- total_flow() and molar_fractions() --------------------------------------
 
 
 def test_total_flow(stream: Stream) -> None:
@@ -56,13 +57,69 @@ def test_total_flow(stream: Stream) -> None:
     assert stream.total_flow(lambda var: values[var]) == pytest.approx(4.0)
 
 
-def test_molar_fraction(stream: Stream) -> None:
-    """Molar fraction is component flow over total flow."""
-    values = {stream.flow["A"]: 3.0, stream.flow["B"]: 1.0}
+# --- molar_fractions() ------------------------------------------------------
 
-    fraction = stream.molar_fraction("A", lambda var: values[var])
 
-    assert fraction == pytest.approx(0.75)
+def test_molar_fractions(stream: Stream) -> None:
+    """Fractions are component flow over total flow, per component."""
+    stream.specify(A=3.0, B=1.0)
+
+    assert stream.molar_fractions() == pytest.approx({"A": 0.75, "B": 0.25})
+
+
+def test_molar_fractions_zero_flow_is_none(stream: Stream) -> None:
+    """An empty stream has no composition, and that is not an error."""
+    stream.specify(A=0.0, B=0.0)
+
+    assert stream.molar_fractions() is None
+
+
+def test_molar_fractions_zero_tol_boundary(stream: Stream) -> None:
+    """A total flow at or below `zero_tol` counts as empty."""
+    stream.specify(A=1e-6, B=1e-6)
+
+    assert stream.molar_fractions(zero_tol=1e-5) is None
+    assert stream.molar_fractions(zero_tol=1e-7) == pytest.approx(
+        {"A": 0.5, "B": 0.5}
+    )
+
+
+def test_molar_fractions_unset_flow_raises(stream: Stream) -> None:
+    """Fractions need every flow to have a value."""
+    stream.specify(A=1.0)
+
+    with pytest.raises(ValueError, match="S1.flow"):
+        stream.molar_fractions()
+
+
+# --- fraction_residual() ----------------------------------------------------
+
+
+def test_fraction_residual_zero_at_target(stream: Stream) -> None:
+    """The residual vanishes when the fraction equals the target."""
+    stream.specify(A=3.0, B=1.0)
+
+    residual = stream.fraction_residual("A", 0.75, current_value)
+
+    assert residual == pytest.approx(0.0)
+
+
+def test_fraction_residual_off_target(stream: Stream) -> None:
+    """Off target, the residual is flow[A] - fraction * total."""
+    stream.specify(A=3.0, B=1.0)
+
+    residual = stream.fraction_residual("A", 0.5, current_value)
+
+    assert residual == pytest.approx(1.0)
+
+
+def test_fraction_residual_zero_flow(stream: Stream) -> None:
+    """A zero-flow stream gives a zero residual, not a division error."""
+    stream.specify(A=0.0, B=0.0)
+
+    residual = stream.fraction_residual("A", 0.4, current_value)
+
+    assert residual == pytest.approx(0.0)
 
 
 # --- specify() --------------------------------------------------------------
