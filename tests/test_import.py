@@ -23,11 +23,10 @@ PUBLIC_NAMES = [
     "BasisError",
     "ChemingatorError",
     "Component",
-    "ComponentList",
     "ConnectivityError",
     "DegreesOfFreedomError",
     "SolverError",
-    "Variable",
+    "Stream",
 ]
 
 
