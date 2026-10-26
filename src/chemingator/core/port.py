@@ -40,19 +40,29 @@ class Port:
         """Whether a stream is connected to this port."""
         return self.stream is not None
 
+    @property
+    def label(self) -> str:
+        """Unit-qualified port name, e.g. "M1.in0"."""
+        return f"{self.unit.name}.{self.name}"
+
     def attach(self, stream: cg_stream.Stream) -> None:
-        """Attaches a stream to this port.
+        """Links a this port and a stream in both directions.
+
+        Sets `self.stream`, plus `stream.source` or `stream.destination`.
 
         Args:
             stream: The stream to attach.
 
         Raises:
-            ConnectivityError: If a stream is already attached.
+            ConnectivityError: If the port is already connected.
         """
-        if self.connected:
+        if self.stream is not None:
             raise ConnectivityError(
-                f"A stream is already attached to port {self.name} "
-                f"in unit {self.unit.name}."
+                f"Port {self.label!r} is already connected to "
+                f"{self.stream.name!r}"
             )
-
         self.stream = stream
+        if self.kind is PortKind.OUTLET:
+            stream.source = self
+        else:
+            stream.destination = self
