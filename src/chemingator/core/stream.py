@@ -50,16 +50,48 @@ class Stream:
             total += val(var)
         return total
 
-    def molar_fraction(
-        self, name: str, val: expression.Resolver
+    def molar_fractions(
+        self, zero_tol: float = 1e-12
+    ) -> dict[str, float] | None:
+        """Returns the current composition, or None for an empty Stream.
+
+        Uses the variables' current values.
+
+        Args:
+            zero_tol: Total flow in mol/s at or below which the stream counts
+            as empty.
+
+        Raises:
+            ValueError: If a flow has no value yet.
+        """
+        total: float = self.total_flow(variable.current_value)
+        if abs(total) <= zero_tol:
+            return None
+
+        fractions: dict[str, float] = {}
+        for name, var in self.flow.items():
+            if var.value is None:
+                raise ValueError(
+                    f"Flow {self.flow[name]!r} has no value assigned."
+                )
+            fractions[name] = variable.current_value(var) / total
+
+        return fractions
+
+    def fraction_residual(
+        self, name: str, fraction: float, val: expression.Resolver
     ) -> expression.Scalar:
-        """Returns flow[name] / total flow.
+        """Returns flow[name] - fraction * total flow, zero x = fraction.
+
+        The division free from of a mole fraction spec. Linear and valid for
+        a zero-flow stream. Use is in Flowsheet.add_constraint().
 
         Args:
             name: Component name.
+            fraction: Target mole fraction.
             val: Maps each variable to a float, symbol, etc.
         """
-        return val(self.flow[name]) / self.total_flow(val)
+        return val(self.flow[name]) - fraction * self.total_flow(val)
 
     def specify(
         self, flows: Mapping[str, float] | None = None, /, **kwargs: float
