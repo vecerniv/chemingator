@@ -61,8 +61,14 @@ class Port:
                 f"Port {self.label!r} is already connected to "
                 f"{self.stream.name!r}"
             )
+
+        end = "source" if self.kind is PortKind.OUTLET else "destination"
+        taken = getattr(stream, end)
+        if taken is not None:
+            raise ConnectivityError(
+                f"Stream {stream.name!r} already has {end} {taken.label!r}. "
+                "Use a splitter or Mixer to branch or merge flows."
+            )
+
         self.stream = stream
-        if self.kind is PortKind.OUTLET:
-            stream.source = self
-        else:
-            stream.destination = self
+        setattr(stream, end, self)
