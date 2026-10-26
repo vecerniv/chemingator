@@ -55,7 +55,7 @@ class Flowsheet:
         self.streams: dict[str, cg_stream.Stream] = {}
         self.constraints: dict[str, expression.Constraint] = {}
 
-    def add_unit(self, unit: cg_units.Unit) -> cg_units.Unit:
+    def add_unit[UnitT: cg_units.Unit](self, unit: UnitT) -> UnitT:
         """Registers a unit and sets its `flowsheet`.
 
         Raises:
@@ -85,7 +85,7 @@ class Flowsheet:
         end: port.Port | cg_stream.Stream,
         name: str | None = None,
     ) -> cg_stream.Stream:
-        """Connects a stream ot outlet port to an inlet port of stream.
+        """Connects a stream or outlet port to an inlet port or stream.
 
         Accepted forms:
             (stream, inlet) for feed,
@@ -123,7 +123,7 @@ class Flowsheet:
                 ports = [outlet, inlet]
             case _:
                 raise exceptions.ConnectivityError(
-                    f"Cannot connect {start!r} to {end!r}: atleast one end "
+                    f"Cannot connect {start!r} to {end!r}: at least one end "
                     "must be a port."
                 )
 
@@ -135,7 +135,7 @@ class Flowsheet:
     def _check_port(self, p: port.Port, kind: port.PortKind) -> None:
         if p.unit.flowsheet is not self:
             raise exceptions.ConnectivityError(
-                f"Port {p.label!r} belongs to a unit not in this " "flowsheet."
+                f"Port {p.label!r} belongs to a unit not in this flowsheet."
             )
         if p.kind is not kind:
             raise exceptions.ConnectivityError(
@@ -196,10 +196,10 @@ class Flowsheet:
         self.constraints[name] = constraint
 
     def validate(self) -> None:
-        """Checks that every port is connected.
+        """Checks that every port and stream is connected.
 
         Raises:
-            ConnectivityError: If a port is dangling.
+            ConnectivityError: If a port or a stream is dangling.
         """
         dangling_ports = [p.label for p in self._ports() if not p.connected]
         orphan_streams = [
@@ -238,14 +238,14 @@ class Flowsheet:
     def residuals(
         self, val: expression.Resolver, ops: expression.MathOps
     ) -> list[expression.Scalar]:
-        """Return unit residuals, then constraints, in deterministic order.
+        """Returns unit residuals, then constraints, in deterministic order.
 
         Order: units in insertion order, each unit's residuals in its own
         order, then constraints in insertion order.
 
         Args:
             val: Maps each variable to a float, symbol, etc.
-            ops: Namespace providing operation like exp, log, ...
+            ops: Namespace providing operations like exp, log, ...
 
         Returns:
             One residual per equation, sum(Unit.n_equations) +
@@ -273,7 +273,7 @@ class Flowsheet:
     def check_dof(self, raise_on_error: bool = True) -> DofReport:
         """Runs the degree of freedom analysis.
 
-        Counts equations with Unit.n_equations plus one per constaint.
+        Counts equations with Unit.n_equations plus one per constraint.
 
         Args:
             raise_on_error: Raise instead of returning when DOF != 0.
