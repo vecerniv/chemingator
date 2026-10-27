@@ -7,7 +7,11 @@ import pytest
 from chemingator.core import expression
 from chemingator.core.port import Port
 from chemingator.core.port import PortKind
+from chemingator.core.stream import Stream
 from chemingator.core.variable import Variable
+from chemingator.exceptions import ChemingatorError
+from chemingator.exceptions import ConnectivityError
+from chemingator.flowsheet import Flowsheet
 from chemingator.units.base import Unit
 
 # --- Test doubles -----------------------------------------------------------
@@ -27,6 +31,14 @@ class OpenUnit(Unit):
     def add_variable(self, local_name: str, **kwargs: Any) -> Variable:
         """Public wrapper around _add_variable."""
         return self._add_variable(local_name, **kwargs)
+
+    def component_names(self) -> list[str]:
+        """Public wrapper around _component_names."""
+        return self._component_names()
+
+    def stream(self, p: Port) -> Stream:
+        """Public wrapper around _stream."""
+        return self._stream(p)
 
     def residuals(
         self, val: expression.Resolver, ops: expression.MathOps
@@ -175,3 +187,42 @@ def test_initialize_default_changes_nothing() -> None:
     unit.initialize()
 
     assert var.value == 0.5
+
+
+# --- _component_names() and _stream() ---------------------------------------
+
+
+def test_component_names_from_flowsheet() -> None:
+    """A registered unit sees the flowsheet's components, in order."""
+    fs = Flowsheet(["B", "A"])
+    unit = fs.add_unit(OpenUnit("M1"))
+
+    assert unit.component_names() == ["B", "A"]
+
+
+def test_component_names_without_flowsheet_raises() -> None:
+    """A unit not yet added to a flowsheet has no components."""
+    unit = OpenUnit("M1")
+
+    with pytest.raises(ChemingatorError, match="'M1'"):
+        unit.component_names()
+
+
+def test_stream_returns_attached_stream() -> None:
+    """_stream() returns the stream attached to the port."""
+    fs = Flowsheet(["A"])
+    unit = fs.add_unit(OpenUnit("M1"))
+    inlet = unit.add_inlet("in0")
+    feed = fs.add_stream("F")
+    fs.connect(feed, inlet)
+
+    assert unit.stream(inlet) is feed
+
+
+def test_stream_unconnected_port_raises() -> None:
+    """An unconnected port has no stream to return."""
+    unit = OpenUnit("M1")
+    inlet = unit.add_inlet("in0")
+
+    with pytest.raises(ConnectivityError, match="M1.in0"):
+        unit.stream(inlet)
