@@ -8,6 +8,7 @@ from chemingator.exceptions import ConnectivityError
 from chemingator.exceptions import DegreesOfFreedomError
 from chemingator.exceptions import SolverError
 from chemingator.flowsheet import Flowsheet
+from chemingator.units.mixer import Mixer
 
 __all__ = [
     "BasisError",
@@ -16,6 +17,7 @@ __all__ = [
     "ConnectivityError",
     "DegreesOfFreedomError",
     "Flowsheet",
+    "Mixer",
     "SolverError",
     "Stream",
 ]

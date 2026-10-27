@@ -17,6 +17,7 @@ MODULES = [
     "chemingator.properties.base",
     "chemingator.units",
     "chemingator.units.base",
+    "chemingator.units.mixer",
 ]
 
 PUBLIC_NAMES = [
@@ -26,6 +27,7 @@ PUBLIC_NAMES = [
     "ConnectivityError",
     "DegreesOfFreedomError",
     "Flowsheet",
+    "Mixer",
     "SolverError",
     "Stream",
 ]
