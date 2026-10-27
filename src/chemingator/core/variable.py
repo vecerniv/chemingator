@@ -6,27 +6,53 @@ from __future__ import annotations
 class Variable:
     """A scalar unknown or specification.
 
-    Specifications are made by fixing a variable to a value.
-    Residuals are written in terms of `symbol`.
+    Specifications are made by fixing a variable to a value. Bounds are
+    enforced only when fixing.
 
     Attributes:
-        name: Globally unique name, e.g. "S1.flow[A]"
-        value: Current value or initial guess while unsolved.
-        fixed: True if value is a specification.
-        units: SI unit string.
+        name: Globally unique name, e.g. "S1.flow[A]".
+        lower: Lower bound, or None.
+        upper: Upper bound, or None.
+        units: SI unit string, informational only.
     """
 
     def __init__(
         self,
         name: str,
+        *,
         value: float | None = None,
+        lower: float | None = None,
+        upper: float | None = None,
         fixed: bool = False,
         units: str = "",
     ) -> None:
+        """Initializes the variable.
+
+        Args:
+            name: Globally unique name, e.g. "S1.flow[A]".
+            value: Initial value or guess. None means unset.
+            lower: Lower bound, or None.
+            upper: Upper bound, or None.
+            fixed: Whether to fix the variable as a specification.
+            units: SI unit string, informational only.
+
+        Raises:
+            ValueError: If `lower` > `upper`, or if `fixed` is True and
+                `value` is None or outside the bounds.
+        """
+        if lower is not None and upper is not None and lower > upper:
+            raise ValueError(
+                f"Variable {name!r} has lower bound {lower} > upper bound "
+                f"{upper}."
+            )
+
         self.name = name
         self.units = units
         self._value = value
+        self.lower = lower
+        self.upper = upper
         self._fixed = False
+
         if fixed:
             self.fix()
 
@@ -51,6 +77,16 @@ class Variable:
         """True if value is a specification."""
         return self._fixed
 
+    def within_bounds(self, tol: float = 0.0) -> bool:
+        """Whether the value lies in [lower - tol, upper + tol].
+
+        True if the value is None or a bound is None.
+
+        Args:
+            tol: Absolute tolerance on both bounds.
+        """
+        return self._in_bounds(self._value, tol)
+
     def fix(self, value: float | None = None) -> None:
         """Marks the variable as a specification.
 
@@ -58,21 +94,37 @@ class Variable:
             value: New value. If None, the current value is kept.
 
         Raises:
-            ValueError: If both `value` and the current value are None.
+            ValueError: If both `value` and the current value are None, or
+                the resulting value is outside the bounds.
         """
-        if value is not None:
-            self._value = value
+        new_value = self._value if value is None else value
 
-        if self._value is None:
+        if new_value is None:
             raise ValueError(
-                f"Unable to fix variable {self.name} with `value` None."
+                f"Unable to fix variable {self.name!r} with `value` None."
             )
 
+        if not self._in_bounds(new_value):
+            raise ValueError(
+                f"Unable to fix variable {self.name!r} to {new_value}:"
+                f"outside of bounds [{self.lower}, {self.upper}]."
+            )
+
+        self._value = new_value
         self._fixed = True
 
     def unfix(self) -> None:
-        """Marks the variable as an unknown, keeping it's value as a guess."""
+        """Marks the variable as an unknown, keeping its value as a guess."""
         self._fixed = False
+
+    def _in_bounds(self, value: float | None, tol: float = 0.0) -> bool:
+        if value is None:
+            return True
+        if self.lower is not None and value < self.lower - tol:
+            return False
+        if self.upper is not None and value > self.upper + tol:
+            return False
+        return True
 
 
 def current_value(var: Variable) -> float:
