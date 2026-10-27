@@ -14,23 +14,60 @@ def test_defaults() -> None:
 
     assert var.name == "T"
     assert var.value is None
+    assert var.lower is None
+    assert var.upper is None
     assert var.fixed is False
     assert var.units == ""
 
 
 def test_create_fixed_with_value() -> None:
     """A variable can be created already fixed if it has a value."""
-    var = Variable("T", value=300.0, fixed=True, units="K")
+    var = Variable(
+        "T", value=300.0, lower=0.0, upper=500.0, fixed=True, units="K"
+    )
 
     assert var.value == 300.0
+    assert var.lower == 0.0
+    assert var.upper == 500.0
     assert var.fixed is True
     assert var.units == "K"
+
+
+def test_create_lower_bound() -> None:
+    """A variable can be created with a lower bound only."""
+    var = Variable("T", value=300.0, lower=100.0)
+
+    assert var.value == 300.0
+    assert var.lower == 100.0
+    assert var.upper is None
+
+
+def test_create_upper_bound() -> None:
+    """A variable can be created with an upper bound only."""
+    var = Variable("T", value=300.0, upper=500.0)
+
+    assert var.value == 300.0
+    assert var.lower is None
+    assert var.upper == 500.0
+
+
+def test_create_fixed_outside_bounds_raises() -> None:
+    """A specification outside of bounds is rejected."""
+    with pytest.raises(ValueError):
+        Variable("T", value=300.0, lower=500.0, fixed=True)
 
 
 def test_create_fixed_without_value_raises() -> None:
     """A specification without value is rejected."""
     with pytest.raises(ValueError):
         Variable("T", fixed=True)
+
+
+def test_positional_after_name_raises() -> None:
+    """A variable constructed with positional arguments after `name`
+    is rejected."""
+    with pytest.raises(TypeError):
+        Variable("T", 300.0)  # pylint: disable=too-many-function-args
 
 
 # --- Properties -------------------------------------------------------------
@@ -108,6 +145,17 @@ def test_fix_without_value_raises() -> None:
     assert var.fixed is False
 
 
+def test_failed_fix_keeps_value() -> None:
+    """Failed fix() keeps the variables original state."""
+    var = Variable("T", value=300.0, lower=100.0)
+
+    with pytest.raises(ValueError):
+        var.fix(50.0)
+
+    assert var.value == 300.0
+    assert var.fixed is False
+
+
 # --- unfix() ----------------------------------------------------------------
 
 
@@ -158,3 +206,42 @@ def test_current_value_unset_raises() -> None:
 
     with pytest.raises(ValueError, match="'T'"):
         current_value(var)
+
+
+# --- within_bounds() --------------------------------------------------------
+
+
+def test_bounds_without_tol() -> None:
+    """A variable lies in bounds with no tolerance."""
+    var = Variable("T", value=300.0, lower=100.0, upper=500.0)
+
+    res = var.within_bounds()
+
+    assert res is True
+
+
+def test_bounds_with_tol() -> None:
+    """A variables lies in bounds with tolerance."""
+    var = Variable("T", value=99.0, lower=100.0)
+
+    res = var.within_bounds(tol=2.0)
+
+    assert res is True
+
+
+def test_none_value_in_bounds() -> None:
+    """A variable with no value is in bounds."""
+    var = Variable("T")
+
+    res = var.within_bounds()
+
+    assert res is True
+
+
+def test_value_in_no_bounds() -> None:
+    """A variable with no bounds is in bounds."""
+    var = Variable("T", value=300.0)
+
+    res = var.within_bounds()
+
+    assert res is True
