@@ -5,8 +5,10 @@ from __future__ import annotations
 import abc
 from typing import Any
 
+from chemingator import exceptions
 from chemingator.core import expression
 from chemingator.core import port
+from chemingator.core import stream as cg_stream
 from chemingator.core import variable
 
 
@@ -64,6 +66,32 @@ class Unit(abc.ABC):
         var = variable.Variable(f"{self.name}.{local_name}", **kwargs)
         self._internal.append(var)
         return var
+
+    def _component_names(self) -> list[str]:
+        """Returns the flowsheer's component names in order.
+
+        Raises:
+            ChemingatorError: If the unit is not in a flowsheet yet.
+        """
+        if self.flowsheet is None:
+            raise exceptions.ChemingatorError(
+                f"Unit {self.name!r} is not in a flowsheet. "
+                "Call Flowsheet.add_unit() first."
+            )
+        names: list[str] = self.flowsheet.components.names()
+        return names
+
+    def _stream(self, p: port.Port) -> cg_stream.Stream:
+        """Returns the stream attached to one of this unit's ports.
+
+        Raises:
+            ConnectivityError: If no stream is attached.
+        """
+        if p.stream is None:
+            raise exceptions.ConnectivityError(
+                f"Port {p.label!r} is not connected."
+            )
+        return p.stream
 
     def internal_variables(self) -> list[variable.Variable]:
         """Returns variables owned by the unit."""
