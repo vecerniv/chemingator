@@ -19,6 +19,7 @@ MODULES = [
     "chemingator.units",
     "chemingator.units.base",
     "chemingator.units.mixer",
+    "chemingator.units.splitter",
 ]
 
 PUBLIC_NAMES = [
@@ -30,6 +31,7 @@ PUBLIC_NAMES = [
     "Flowsheet",
     "Mixer",
     "SolverError",
+    "Splitter",
     "Stream",
 ]
 

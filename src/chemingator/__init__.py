@@ -9,6 +9,7 @@ from chemingator.exceptions import DegreesOfFreedomError
 from chemingator.exceptions import SolverError
 from chemingator.flowsheet import Flowsheet
 from chemingator.units.mixer import Mixer
+from chemingator.units.splitter import Splitter
 
 __all__ = [
     "BasisError",
@@ -19,5 +20,6 @@ __all__ = [
     "Flowsheet",
     "Mixer",
     "SolverError",
+    "Splitter",
     "Stream",
 ]
