@@ -1,4 +1,4 @@
-"""Scalar variables: unknowns and specifications of a flowsheet"""
+"""Scalar variables: unknowns and specifications of a flowsheet."""
 
 from __future__ import annotations
 
@@ -106,7 +106,7 @@ class Variable:
 
         if not self._in_bounds(new_value):
             raise ValueError(
-                f"Unable to fix variable {self.name!r} to {new_value}:"
+                f"Unable to fix variable {self.name!r} to {new_value}: "
                 f"outside of bounds [{self.lower}, {self.upper}]."
             )
 
