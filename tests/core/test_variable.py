@@ -51,21 +51,32 @@ def test_create_upper_bound() -> None:
     assert var.upper == 500.0
 
 
-def test_create_fixed_outside_bounds_raises() -> None:
-    """A specification outside of bounds is rejected."""
-    with pytest.raises(ValueError):
+def test_create_fixed_below_lower_raises() -> None:
+    """A specification below lower bound is rejected."""
+    with pytest.raises(ValueError, match="outside"):
         Variable("T", value=300.0, lower=500.0, fixed=True)
+
+
+def test_create_fixed_above_upper_raises() -> None:
+    """A specification above upper bound is rejected."""
+    with pytest.raises(ValueError, match="outside"):
+        Variable("T", value=300.0, upper=200.0, fixed=True)
+
+
+def test_create_lower_bigger_than_upper_raises() -> None:
+    """A variable with lower bound higher than upper bound is rejected."""
+    with pytest.raises(ValueError, match="lower bound"):
+        Variable("T", lower=100.0, upper=10.0)
 
 
 def test_create_fixed_without_value_raises() -> None:
     """A specification without value is rejected."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="None"):
         Variable("T", fixed=True)
 
 
 def test_positional_after_name_raises() -> None:
-    """A variable constructed with positional arguments after `name`
-    is rejected."""
+    """Arguments after name are keyword only."""
     with pytest.raises(TypeError):
         Variable("T", 300.0)  # pylint: disable=too-many-function-args
 
@@ -84,7 +95,7 @@ def test_fixed_var_cannot_lose_value() -> None:
 
 
 def test_unfix_var_can_be_none() -> None:
-    """An unfix variable can have None assigned to `value`."""
+    """An unfixed variable can have None assigned to `value`."""
     var = Variable("T", value=300.0)
 
     var.value = None
@@ -135,6 +146,16 @@ def test_fix_to_zero() -> None:
     assert var.fixed is True
 
 
+def test_fix_value_equal_to_bounds() -> None:
+    """fix() with value == lower == upper is a valid specification."""
+    var = Variable("T", lower=100.0, upper=100.0)
+
+    var.fix(100.0)
+
+    assert var.value == 100.0
+    assert var.fixed is True
+
+
 def test_fix_without_value_raises() -> None:
     """fix() on a variable without value fails."""
     var = Variable("T")
@@ -146,7 +167,7 @@ def test_fix_without_value_raises() -> None:
 
 
 def test_failed_fix_keeps_value() -> None:
-    """Failed fix() keeps the variables original state."""
+    """Failed fix() keeps the variable's original state."""
     var = Variable("T", value=300.0, lower=100.0)
 
     with pytest.raises(ValueError):
@@ -215,33 +236,47 @@ def test_bounds_without_tol() -> None:
     """A variable lies in bounds with no tolerance."""
     var = Variable("T", value=300.0, lower=100.0, upper=500.0)
 
-    res = var.within_bounds()
-
-    assert res is True
+    assert var.within_bounds() is True
 
 
 def test_bounds_with_tol() -> None:
-    """A variables lies in bounds with tolerance."""
+    """`tol` widens the bounds."""
     var = Variable("T", value=99.0, lower=100.0)
 
-    res = var.within_bounds(tol=2.0)
-
-    assert res is True
+    assert var.within_bounds() is False
+    assert var.within_bounds(tol=2.0) is True
 
 
 def test_none_value_in_bounds() -> None:
     """A variable with no value is in bounds."""
     var = Variable("T")
 
-    res = var.within_bounds()
-
-    assert res is True
+    assert var.within_bounds() is True
 
 
 def test_value_in_no_bounds() -> None:
     """A variable with no bounds is in bounds."""
     var = Variable("T", value=300.0)
 
-    res = var.within_bounds()
+    assert var.within_bounds() is True
 
-    assert res is True
+
+def test_value_not_in_bounds_lower() -> None:
+    """A variable below lower returns False."""
+    var = Variable("T", value=100.0, lower=200.0)
+
+    assert var.within_bounds() is False
+
+
+def test_value_not_in_bounds_upper() -> None:
+    """A variable above upper returns False."""
+    var = Variable("T", value=100.0, upper=50.0)
+
+    assert var.within_bounds() is False
+
+
+def test_value_at_bound() -> None:
+    """A value exactly on bounds returns True."""
+    var = Variable("T", value=100.0, lower=100.0, upper=100.0)
+
+    assert var.within_bounds() is True
