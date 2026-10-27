@@ -26,14 +26,14 @@ class Mixer(base.Unit):
 
         Args:
             name: Unique unit name.
-            n_inlets: Number of inlets, atleast 1.
+            n_inlets: Number of inlets, at least 1.
 
         Raises:
             ValueError: If `n_inlets` is less than 1.
         """
         if n_inlets < 1:
             raise ValueError(
-                f"Mixer {name!r} needs at least 1 inlet, recieved {n_inlets}."
+                f"Mixer {name!r} needs at least 1 inlet, received {n_inlets}."
             )
         super().__init__(name)
 
