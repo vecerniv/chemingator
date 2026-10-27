@@ -13,6 +13,7 @@ MODULES = [
     "chemingator.core.stream",
     "chemingator.core.variable",
     "chemingator.exceptions",
+    "chemingator.flowsheet",
     "chemingator.properties",
     "chemingator.properties.base",
     "chemingator.units",
