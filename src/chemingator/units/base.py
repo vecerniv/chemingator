@@ -68,7 +68,7 @@ class Unit(abc.ABC):
         return var
 
     def _component_names(self) -> list[str]:
-        """Returns the flowsheer's component names in order.
+        """Returns the flowsheet's component names in order.
 
         Raises:
             ChemingatorError: If the unit is not in a flowsheet yet.
