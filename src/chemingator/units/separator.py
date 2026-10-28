@@ -11,16 +11,15 @@ from chemingator.units import base as cg_base
 
 
 class ComponentSeparator(cg_base.Unit):
-    """
-    Splits one inlet into top and bottom by component recovery.
+    """Splits one inlet into top and bottom by component recovery.
 
     Internal variables:
         recovery[c]: Fraction of component c sent to top (-), in [0, 1].
 
     Residuals:
 
-        recovery[c] * top[c] - in[c] = 0
-        in[c] - top[c] + bottom[c] = 0
+        recovery[c] * in[c] - top[c] = 0
+        in[c] - top[c] - bottom[c] = 0
 
     Attributes:
         inlet: Inlet port "in".
@@ -83,7 +82,7 @@ class ComponentSeparator(cg_base.Unit):
 
     @override
     def initialize(self) -> None:
-        """Guesses each unfixed outlet flows from recoveries.
+        """Guesses each unfixed outlet flow from recoveries.
 
         Skips a component if its inlet flow or recovery has no value yet.
         """
