@@ -71,7 +71,7 @@ class ComponentSeparator(cg_base.Unit):
             for c in names
         ]
         res.extend(
-            [val(inlet.flow[c]) - val(top.flow[c]) - val(bottom.flow[c])]
+            val(inlet.flow[c]) - val(top.flow[c]) - val(bottom.flow[c])
             for c in names
         )
 
