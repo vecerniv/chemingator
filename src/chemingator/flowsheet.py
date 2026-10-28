@@ -63,7 +63,7 @@ class Flowsheet:
         """
         if unit.name in self.units:
             raise ValueError(f"Duplicate unit name: {unit.name!r}")
-        unit.flowsheet = self
+        unit.attach(self)
         self.units[unit.name] = unit
         return unit
 
