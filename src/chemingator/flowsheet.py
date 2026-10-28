@@ -60,6 +60,7 @@ class Flowsheet:
 
         Raises:
             ValueError: If the name is already used.
+            ChemingatorError: If the unit already belongs to a flowsheet.
         """
         if unit.name in self.units:
             raise ValueError(f"Duplicate unit name: {unit.name!r}")
