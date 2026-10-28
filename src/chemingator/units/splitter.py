@@ -19,7 +19,7 @@ class Splitter(base.Unit):
     Residuals:
 
         sum_i split[i] - 1 = 0
-        split[i] * in[c] - out_j[c] = 0
+        split[i] * in[c] - out_i[c] = 0
 
     Attributes:
         inlet: Inlet port "in".
