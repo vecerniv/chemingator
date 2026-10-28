@@ -19,6 +19,7 @@ MODULES = [
     "chemingator.units",
     "chemingator.units.base",
     "chemingator.units.mixer",
+    "chemingator.units.separator",
     "chemingator.units.splitter",
 ]
 
@@ -26,6 +27,7 @@ PUBLIC_NAMES = [
     "BasisError",
     "ChemingatorError",
     "Component",
+    "ComponentSeparator",
     "ConnectivityError",
     "DegreesOfFreedomError",
     "Flowsheet",

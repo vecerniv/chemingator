@@ -9,12 +9,14 @@ from chemingator.exceptions import DegreesOfFreedomError
 from chemingator.exceptions import SolverError
 from chemingator.flowsheet import Flowsheet
 from chemingator.units.mixer import Mixer
+from chemingator.units.separator import ComponentSeparator
 from chemingator.units.splitter import Splitter
 
 __all__ = [
     "BasisError",
     "ChemingatorError",
     "Component",
+    "ComponentSeparator",
     "ConnectivityError",
     "DegreesOfFreedomError",
     "Flowsheet",
