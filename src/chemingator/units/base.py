@@ -101,6 +101,24 @@ class Unit(abc.ABC):
         """Returns all ports, inlets first."""
         return [*self.inlets, *self.outlets]
 
+    def attach(self, flowsheet: Any) -> None:
+        """Links the unit to its flowsheet and builds component variables.
+
+        Called by Flowsheet.add_unit(), not meant to be called directly.
+
+        Args:
+            flowsheet: The owning flowsheet.
+
+        Raises:
+            ChemingatorError: If the unit already belongs to a flowsheet.
+        """
+        if self.flowsheet is not None:
+            raise exceptions.ChemingatorError(
+                f"Unit {self.name!r} already belongs to a flowsheet."
+            )
+        self.flowsheet = flowsheet
+        self._build()
+
     @abc.abstractmethod
     def residuals(
         self, val: expression.Resolver, ops: expression.MathOps
@@ -125,4 +143,11 @@ class Unit(abc.ABC):
         """Sets initial guesses for outlet/internal from inlets.
 
         Default does nothing, subclasses may override.
+        """
+
+    def _build(self) -> None:
+        """Creates variables that depend on the flowsheet's components.
+
+        Run once, right after the unit joins a flowsheet. The default does
+        nothing, subclasses may override.
         """
