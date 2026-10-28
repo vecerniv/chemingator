@@ -50,6 +50,18 @@ class OpenUnit(Unit):
         return 0
 
 
+class BuildCountingUnit(OpenUnit):
+    """OpenUnit that counts how often _build() runs."""
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self.builds = 0
+
+    def _build(self) -> None:
+        self.builds += 1
+        self._add_variable(f"x[{self._component_names()[0]}]")
+
+
 # --- Abstract interface -----------------------------------------------------
 
 
@@ -226,3 +238,64 @@ def test_stream_unconnected_port_raises() -> None:
 
     with pytest.raises(ConnectivityError, match="M1.in0"):
         unit.stream(inlet)
+
+
+# --- attach() and _build() --------------------------------------------------
+
+
+def test_attach_sets_flowsheet_and_builds() -> None:
+    """attach() links the flowsheet, then runs _build() once."""
+    fs = Flowsheet(["A"])
+    unit = BuildCountingUnit("M1")
+
+    unit.attach(fs)
+
+    assert unit.flowsheet is fs
+    assert unit.builds == 1
+    assert [v.name for v in unit.internal_variables()] == ["M1.x[A]"]
+
+
+def test_attach_twice_raises() -> None:
+    """A unit belongs to one flowsheet; _build() does not run again."""
+    first = Flowsheet(["A"])
+    unit = BuildCountingUnit("M1")
+    unit.attach(first)
+
+    with pytest.raises(ChemingatorError, match="'M1'"):
+        unit.attach(Flowsheet(["A"]))
+
+    assert unit.flowsheet is first
+    assert unit.builds == 1
+
+
+def test_default_build_adds_nothing() -> None:
+    """Without an override, attaching creates no variables."""
+    unit = OpenUnit("M1")
+
+    unit.attach(Flowsheet(["A"]))
+
+    assert not unit.internal_variables()
+
+
+def test_add_unit_builds_unit() -> None:
+    """Flowsheet.add_unit() goes through attach(), so _build() runs."""
+    fs = Flowsheet(["A"])
+
+    unit = fs.add_unit(BuildCountingUnit("M1"))
+
+    assert unit.flowsheet is fs
+    assert unit.builds == 1
+
+
+def test_add_unit_to_second_flowsheet_raises() -> None:
+    """Adding a unit to another flowsheet fails and changes nothing."""
+    first = Flowsheet(["A"])
+    second = Flowsheet(["A"])
+    unit = first.add_unit(BuildCountingUnit("M1"))
+
+    with pytest.raises(ChemingatorError, match="'M1'"):
+        second.add_unit(unit)
+
+    assert unit.flowsheet is first
+    assert not second.units
+    assert unit.builds == 1
